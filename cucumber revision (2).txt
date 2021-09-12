@@ -1,0 +1,340 @@
+Cucumber:
+--------
+BDD - Behaviour Driven Development Framework
+    - Open source tool [Cucumber]
+
+Install:
+-------
+Natural plugin (or) cucumber plugin
+
+Dependency:
+-----------
+info-cukes - 1.2.5 version
+
+Cucumber-core
+cucumber-java
+cucumber-junit
+
+3 major:
+--------
+Step 1:
+------
+Feature:
+--------
+Feature: Overall functionality
+    
+Scenario: Step by step
+ Given: Pre-condition (or) will launch url
+ When: Action
+ And: Addition Actions
+ Then: Validation [Assert] (or) post condition
+	
+Step definition:
+---------------
+Step 3:
+------
+will maintain snippets[Undefined methods]
+
+Step 2:
+-------
+Runner:
+------
+@RunWith(Cucumber.class)
+@CucumberOptions(features = "src... .feature",
+			glue = "SD-package name")
+
+Step 4:
+------
+public class Runner {
+
+public static WebDriver driver;
+
+@BeforeClass
+public static void setUp(){
+
+-> Will initialiaze driver  
+
+}
+
+@AfterClass
+public static void tearDown(){
+
+driver.quite()
+}
+
+}
+
+Step 5:
+------
+Page Object Model:[POM]
+-----------------
+public static WebDriver driver;
+
+@FindBy(locator = "attribute value")
+private webelement elementName;
+
+public Constructor(Webdriver pdriver){
+
+this.driver = pdriver;
+PageFactory.initElements(pdriver,this);
+
+}
+getters(){
+return elementName;
+}
+
+Step 6:[SD]
+------
+SD extends BaseClass{
+
+public static WebDriver driver = Runner.driver;
+PomObject p = new PomObject(driver);
+
+}
+
+Step 7:
+------
+com.projectName.helper
+
+PageObjectManager:
+-----------------
+public class PageObjectManager{
+
+	public static webdriver driver;
+
+	private PomPage1 objName1;
+	private PomPage2 objName2;
+	private PomPage3 objName3;
+
+	public constructor(webdriver ldriver){
+	this.driver = ldriver;
+	}
+	public PomPage1 objName1(){
+		objName1 = new PomPage1;
+		return objName1;
+	}
+}
+
+Step 8:[SD]
+------
+SD extends BaseClass{
+
+public static WebDriver driver = Runner.driver;
+
+PageObjectManager pom = new PageObjectManager(driver);
+
+}
+
+Step 9:
+------
+Property file:[Configuration.properties]
+-------------
+-> Will maintain rarely changed datas[key = value].
+
+  -url
+  -browser
+
+Step 10:
+--------
+Configuration Reader:
+--------------------
+-> constructor:- convert property file into java-selenium property file
+	- file path
+	- will read data using "FILE INPUT STREAM"
+	- will create object for property file
+	- will load datas in object
+
+-> public static String getBrowser(){
+	String browser = PropertyFileobject.getProperty("key");
+	return browser;
+}
+
+-> public static String getUrl(){
+	String url = PropertyFileobject.getProperty("key");
+	return url;
+}
+
+Step 11:[Singleton Design Pattern]
+--------
+File Reader Manager:
+-------------------
+-> private empty constructor
+-> public static FileReaderManager getInstance(){
+	
+	- will create object for FRM
+	- return frm;
+	}
+
+-> public ConfigurationReader getCrInstance(){
+
+	- will create object for CR
+	- return cr;
+}
+
+Step 12:
+-------
+Runner:
+------
+@RunWith(Cucumber.class)
+@CucumberOptions(features = "src... .feature",
+			glue = "SD-package name")
+
+public class Runner {
+
+public static WebDriver driver;
+
+@BeforeClass
+public static void setUp(){
+
+String browsername = FileReaderManager.getInstance().getCrInstance().getBrowser();
+driver = BaseClass.browserlaunch(browsername);
+
+}
+
+@AfterClass
+public static void tearDown(){
+
+driver.quite()
+}
+
+}
+
+Step 13:[SD]
+-------
+@Given
+url_the_launch(){
+
+String url = FileReaderManager.getInstance().getCrInstance().getUrl();
+getUrl(url);
+}
+
+Step 14:
+-------
+Runner:
+------
+@RunWith(Cucumber.class)
+@ExtentCucumberOptions(retryCount = 4)
+@CucumberOptions(features = "src... .feature",
+		 glue = "SD-package name",
+		 monochrome = true,->[to avoid special characters]
+		 dryRun = false, [will check feature and SD if there is any mismatch it will continue the execution]
+		 strict = true,[will check feature and SD if there is any mismatch it will Stop the execution immediately]
+		 Plugins = {"html:FolderName",
+			    "json:FolderName//ReportName.txt",
+			    "pretty",
+			    "com.cucumber.listener.ExtentCucumberFormatter:FolderName//ReportName.html",
+			    "rerun:FailedScenario.txt"
+  },
+		
+		 tags = {"@Login","~@SearchHotel"}			 
+
+)
+
+Extent report dependency:
+-------------------------
+-> vimalselvam - extentsreport
+-> extentreports
+
+Extent Cucumber option dependency:
+---------------------------------
+cucumber-runner =>1.3.5 version
+
+Background:
+-----------
+-> it's also scenario
+-> will run before each and every scenario
+
+Hooks:
+-----
+-> scenario title
+-> check scenario status [failed,passed,skipped]
+-> can also take screenShot of failed test scenarios
+
+Hooks extends BaseClass{
+@Before
+public static void beforeHooks(Scenario scenario){
+
+sysout(scenario.getName());
+}
+
+@After
+public static void afterHooks(Scenario scenario){
+
+sysout((scenario.getStatus());
+
+if(scenario.isFailed()){
+screenShot("fileName");
+}
+
+}
+}
+
+Scenario:
+---------
+-> Can pass one user details or datas
+
+Scenario outline:
+-----------------
+-> can pass multiple user details or datas in "Example" keyword [|| -> pipe symbol]
+
+TestRunner:
+----------
+@RunWith(Cucumber.class)
+@CucumberOptions(features = "@FolderName//FailedScenario.txt",
+		 glue = "SD-package name",
+		 monochrome = true,->[to avoid special characters]
+		 dryRun = false, [will check feature and SD if there is any mismatch it will continue the execution]
+		 strict = true,[will check feature and SD if there is any mismatch it will Stop the execution immediately]
+		 Plugins = {"html:FolderName",
+			    "json:FolderName//ReportName.txt",
+			    "pretty",
+			    "com.cucumber.listener.ExtentCucumberFormatter:FolderName//ReportName.html",
+			    "rerun:FolderName//FailedScenario.txt"
+  			   },
+		
+		 tags = {"@Login","~@SearchHotel"}			 
+
+)
+
+Maven- run:
+----------
+compiler plugin -> to compile
+surefire plugin -> to test/build
+
+Parallel test:
+-------------
+<configuration>
+<parallel> Classes </parallel>
+<threadcount> 2 <threadcount>
+
+	     (or)
+
+<forkcount> 2 <forkcount>
+<includes>
+<include>**/*Runner.java</include>
+<includes>
+<configuration>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
